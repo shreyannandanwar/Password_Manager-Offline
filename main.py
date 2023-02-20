@@ -4,6 +4,7 @@ from random import choice, randint, shuffle
 import pyperclip
 import json
 
+DEFAULT_EMAIL = "dummy.@examplemail.com"
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 
 # Password Generator Project
@@ -110,7 +111,7 @@ website_entry.focus()
 
 email_entry = Entry(width=35)
 email_entry.grid(row=2, column=1, columnspan=2)
-email_entry.insert(0, "angela@gmail.com")
+email_entry.insert(0, DEFAULT_EMAIL)
 
 password_entry = Entry(width=21)
 password_entry.grid(row=3, column=1)
