@@ -75,7 +75,8 @@ def find_password():
         if website in data:
             email = data[website]["email"]
             password = data[website]["password"]
-            messagebox.showinfo(title=website, message=f"Email: {email}\nPassword: {password}")
+            description = data[website]["description"]
+            messagebox.showinfo(title=website, message=f"Email: {email}\nPassword: {password}\ndescription:{description}")
         else:
             messagebox.showinfo(title="Error", message=f"No details for {website} exists.")
 
