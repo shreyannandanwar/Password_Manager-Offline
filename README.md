@@ -16,6 +16,11 @@ installing [Pyinstaller](https://pyinstaller.org/en/stable/):
 pip install pyinstaller
 ```
 
+installing [Pypercilp](https://pypi.org/project/pyperclip/):
+```bash
+pip install pyperclip
+```
+
 once done open main.py file and change DEFAULT_EMAIL variable to your choice.
 
 Creating Desktop Appliction:
@@ -51,6 +56,8 @@ python setup.py py2app -A
 ```
 
 after following the steps in the main folder a 'dict' folder is created open it and click on app to start the application.
+
+
 ![Screenshot 2023-02-21 at 3 15 44 AM]
 (https://user-images.githubusercontent.com/98053839/220202950-853cd52b-1172-4bfc-8bc4-c61336c4954e.png)
 
