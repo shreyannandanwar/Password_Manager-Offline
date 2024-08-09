@@ -5,129 +5,110 @@ import pyperclip
 import json
 
 DEFAULT_EMAIL = "dummy.@examplemail.com"
+DATA_FILE = "data.json"
+LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+NUMBERS = '0123456789'
+SYMBOLS = '!#$%&()*+'
+
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 
-# Password Generator Project
 def generate_password():
-    letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
-    numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-    symbols = ['!', '#', '$', '%', '&', '(', ')', '*', '+']
-
-    password_letters = [choice(letters) for _ in range(randint(8, 10))]
-    password_symbols = [choice(symbols) for _ in range(randint(2, 4))]
-    password_numbers = [choice(numbers) for _ in range(randint(2, 4))]
-
-    password_list = password_letters + password_symbols + password_numbers
-    shuffle(password_list)
-
-    password = "".join(password_list)
+    password_characters = (
+        [choice(LETTERS) for _ in range(randint(8, 10))] +
+        [choice(SYMBOLS) for _ in range(randint(2, 4))] +
+        [choice(NUMBERS) for _ in range(randint(2, 4))]
+    )
+    shuffle(password_characters)
+    password = "".join(password_characters)
     password_entry.insert(0, password)
     pyperclip.copy(password)
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
+
+def save_data(data):
+    with open(DATA_FILE, "w") as data_file:
+        json.dump(data, data_file, indent=4)
+
+def load_data():
+    try:
+        with open(DATA_FILE, "r") as data_file:
+            return json.load(data_file)
+    except FileNotFoundError:
+        return {}
+
 def save():
+    website = website_entry.get().strip()
+    email = email_entry.get().strip()
+    password = password_entry.get().strip()
+    description = description_entry.get().strip()
 
-    website = website_entry.get()
-    email = email_entry.get()
-    password = password_entry.get()
-    description = description_entry.get()
-
-    new_data = {
-        website: {
-            "email": email,
-            "password": password,
-            "description": description,
-        }
-    }
-
-    if len(website) == 0 or len(password) == 0:
+    if not website or not password:
         messagebox.showinfo(title="Oops", message="Please make sure you haven't left any fields empty.")
-    else:
-        try:
-            with open("data.json", "r") as data_file:
-                # Reading old data
-                data = json.load(data_file)
-        except FileNotFoundError:
-            with open("data.json", "w") as data_file:
-                json.dump(new_data, data_file, indent=4)
-        else:
-            # Updating old data with new data
-            data.update(new_data)
+        return
 
-            with open("data.json", "w") as data_file:
-                # Saving updated data
-                json.dump(data, data_file, indent=4)
-        finally:
-            website_entry.delete(0, END)
-            password_entry.delete(0, END)
-            description_entry.delete(0, END)
+    new_data = {website: {"email": email, "password": password, "description": description}}
+    data = load_data()
+    data.update(new_data)
+    save_data(data)
 
+    website_entry.delete(0, END)
+    password_entry.delete(0, END)
+    description_entry.delete(0, END)
 
 # ---------------------------- FIND PASSWORD ------------------------------- #
-def find_password():
-    website = website_entry.get()
-    try:
-        with open("data.json") as data_file:
-            data = json.load(data_file)
-    except FileNotFoundError:
-        messagebox.showinfo(title="Error", message="No Data File Found.")
-    else:
-        if website in data:
-            email = data[website]["email"]
-            password = data[website]["password"]
-            description = data[website]["description"]
-            messagebox.showinfo(title=website, message=f"Email: {email}\nPassword: {password}\ndescription:{description}")
-        else:
-            messagebox.showinfo(title="Error", message=f"No details for {website} exists.")
 
+def find_password():
+    website = website_entry.get().strip()
+    data = load_data()
+
+    if website in data:
+        email = data[website]["email"]
+        password = data[website]["password"]
+        description = data[website]["description"]
+        messagebox.showinfo(title=website, message=f"Email: {email}\nPassword: {password}\nDescription: {description}")
+    else:
+        messagebox.showinfo(title="Error", message=f"No details for {website} exist.")
 
 # ---------------------------- UI SETUP ------------------------------- #
 
-window = Tk()
-window.title("Password Manager")
-window.config(padx=50, pady=50)
+def setup_ui():
+    window = Tk()
+    window.title("Password Manager")
+    window.config(padx=50, pady=50)
 
-canvas = Canvas(height=200, width=200)
-logo_img = PhotoImage(file="icons8-lock-200.png")
-canvas.create_image(100, 100, image=logo_img)
-canvas.grid(row=0, column=1)
+    canvas = Canvas(window, height=200, width=200)
+    logo_img = PhotoImage(file="icons8-lock-200.png")
+    canvas.create_image(100, 100, image=logo_img)
+    canvas.grid(row=0, column=1)
 
-# Labels
-website_label = Label(text="Website:")
-website_label.grid(row=1, column=0)
+    # Labels
+    Label(window, text="Website:").grid(row=1, column=0)
+    Label(window, text="Email/Username:").grid(row=2, column=0)
+    Label(window, text="Password:").grid(row=3, column=0)
+    Label(window, text="Description:").grid(row=4, column=0)
 
-email_label = Label(text="Email/Username:")
-email_label.grid(row=2, column=0)
+    # Entries
+    global website_entry, email_entry, password_entry, description_entry
+    website_entry = Entry(window, width=21)
+    website_entry.grid(row=1, column=1)
+    website_entry.focus()
 
-password_label = Label(text="Password:")
-password_label.grid(row=3, column=0)
+    email_entry = Entry(window, width=35)
+    email_entry.grid(row=2, column=1, columnspan=2)
+    email_entry.insert(0, DEFAULT_EMAIL)
 
-description_label = Label(text="Description:")
-description_label.grid(row=4, column=0)
+    password_entry = Entry(window, width=21)
+    password_entry.grid(row=3, column=1)
 
-# Entries
-website_entry = Entry(width=21)
-website_entry.grid(row=1, column=1)
-website_entry.focus()
+    description_entry = Entry(window, width=35)
+    description_entry.grid(row=4, column=1, columnspan=2)
 
-email_entry = Entry(width=35)
-email_entry.grid(row=2, column=1, columnspan=2)
-email_entry.insert(0, DEFAULT_EMAIL)
+    # Buttons
+    Button(window, text="Search", width=13, command=find_password).grid(row=1, column=2)
+    Button(window, text="Generate Password", command=generate_password).grid(row=3, column=2)
+    Button(window, text="Add", width=36, command=save).grid(row=5, column=1, columnspan=2)
 
-password_entry = Entry(width=21)
-password_entry.grid(row=3, column=1)
+    window.mainloop()
 
-description_entry = Entry(width=35)
-description_entry.grid(row=4, column=1, columnspan=2)
-
-# Buttons
-search_button = Button(text="Search", width=13, command=find_password)
-search_button.grid(row=1, column=2)
-
-generate_password_button = Button(text="Generate Password", command=generate_password)
-generate_password_button.grid(row=3, column=2)
-
-add_button = Button(text="Add", width=36, command=save)
-add_button.grid(row=5, column=1, columnspan=2)
-
-window.mainloop()
+if __name__ == "__main__":
+    setup_ui()
